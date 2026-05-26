@@ -32,7 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(RequestLoggingMiddleware)
-app.add_middleware(RateLimitMiddleware)
+#app.add_middleware(RateLimitMiddleware)
 # Error handlers
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)
