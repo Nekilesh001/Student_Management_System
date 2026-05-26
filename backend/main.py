@@ -14,6 +14,9 @@ from app.middleware.error_handlers import (
     http_exception_handler,
     generic_exception_handler
 )
+from app.middleware.logging_middleware import RequestLoggingMiddleware
+from app.middleware.rate_limiter import RateLimitMiddleware
+from app.services.redis_service import get_redis, close_redis
 
 app = FastAPI(
     title="Student Management System",
@@ -28,7 +31,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(RateLimitMiddleware)
 # Error handlers
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)
@@ -39,7 +43,17 @@ app.add_exception_handler(Exception, generic_exception_handler)
 async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    await get_redis()
+
     print("✅ Database tables created successfully")
+    print("✅ Redis connected successfully")
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await close_redis()
+    print("🔴 Redis connection closed")
 
 app.include_router(auth_router)
 app.include_router(students_router)
