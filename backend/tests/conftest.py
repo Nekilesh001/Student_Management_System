@@ -6,12 +6,15 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 from sqlalchemy.pool import NullPool
-
+import os
 from main import app
 from app.database.connection import get_db, Base
 
-TEST_DATABASE_URL = (
-    "postgresql+asyncpg://postgres:neki132506@localhost:5432/studentdb_test"
+
+
+TEST_DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+asyncpg://postgres:postgres@localhost:5432/studentdb_test"
 )
 
 # Important: NullPool prevents loop conflicts
