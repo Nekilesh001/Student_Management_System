@@ -4,8 +4,8 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from app.services.redis_service import get_redis
 
-RATE_LIMIT = 100       # max requests
-WINDOW_SECONDS = 60    # per 60 seconds
+RATE_LIMIT = 100  # max requests
+WINDOW_SECONDS = 60  # per 60 seconds
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
@@ -33,13 +33,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                         "status": "error",
                         "code": 429,
                         "message": "Too many requests. Please slow down.",
-                        "retry_after": WINDOW_SECONDS
+                        "retry_after": WINDOW_SECONDS,
                     },
                     headers={
                         "X-RateLimit-Limit": str(RATE_LIMIT),
                         "X-RateLimit-Remaining": "0",
-                        "Retry-After": str(WINDOW_SECONDS)
-                    }
+                        "Retry-After": str(WINDOW_SECONDS),
+                    },
                 )
 
             response = await call_next(request)

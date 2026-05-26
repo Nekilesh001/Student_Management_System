@@ -4,6 +4,7 @@ from jose import JWTError, jwt
 from app.config import settings
 from app.schemas.token import TokenData
 
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     if expires_delta:
@@ -15,12 +16,11 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
+
 def decode_access_token(token: str) -> Optional[TokenData]:
     try:
         payload = jwt.decode(
-            token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         user_id: int = payload.get("user_id")
         email: str = payload.get("email")

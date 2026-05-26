@@ -4,6 +4,7 @@ from datetime import datetime
 
 # ─── REQUEST SCHEMAS ──────────────────────────────
 
+
 class StudentCreate(BaseModel):
     name: str
     age: int
@@ -11,6 +12,7 @@ class StudentCreate(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
     address: Optional[str] = None
+
 
 class StudentUpdate(BaseModel):
     name: Optional[str] = None
@@ -20,7 +22,9 @@ class StudentUpdate(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
 
+
 # ─── RESPONSE SCHEMAS ─────────────────────────────
+
 
 class StudentResponse(BaseModel):
     id: int
@@ -34,7 +38,9 @@ class StudentResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
 # ─── PAGINATED RESPONSE ───────────────────────────
+
 
 class StudentListResponse(BaseModel):
     total: int

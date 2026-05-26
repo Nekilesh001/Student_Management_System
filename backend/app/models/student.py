@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 from app.database.connection import Base
 
+
 class Student(Base):
     __tablename__ = "students"
 
@@ -14,9 +15,7 @@ class Student(Base):
     phone: Mapped[str] = mapped_column(String(20), nullable=True)
     address: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[DateTime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False
+        DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
     def __repr__(self):

@@ -49,7 +49,7 @@ async def get_all_students(
     page: int = 1,
     limit: int = 10,
     name: str = None,
-    department: str = None
+    department: str = None,
 ):
     cache_key = students_list_cache_key(page, limit, name, department)
 
@@ -86,17 +86,12 @@ async def get_all_students(
             "email": s.email,
             "phone": s.phone,
             "address": s.address,
-            "created_at": s.created_at.isoformat()
+            "created_at": s.created_at.isoformat(),
         }
         for s in students
     ]
 
-    response = {
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "students": students_data
-    }
+    response = {"total": total, "page": page, "limit": limit, "students": students_data}
 
     try:
         redis = await get_redis()
@@ -123,7 +118,9 @@ async def get_student_by_id(db: AsyncSession, student_id: int) -> Student:
     result = await db.execute(select(Student).where(Student.id == student_id))
     student = result.scalar_one_or_none()
     if not student:
-        raise HTTPException(status_code=404, detail=f"Student with id {student_id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"Student with id {student_id} not found"
+        )
 
     try:
         redis = await get_redis()
@@ -135,7 +132,7 @@ async def get_student_by_id(db: AsyncSession, student_id: int) -> Student:
             "email": student.email,
             "phone": student.phone,
             "address": student.address,
-            "created_at": student.created_at.isoformat()
+            "created_at": student.created_at.isoformat(),
         }
         await redis.setex(cache_key, CACHE_TTL, json.dumps(data))
     except Exception:
@@ -144,11 +141,15 @@ async def get_student_by_id(db: AsyncSession, student_id: int) -> Student:
     return student
 
 
-async def update_student(db: AsyncSession, student_id: int, data: StudentUpdate) -> Student:
+async def update_student(
+    db: AsyncSession, student_id: int, data: StudentUpdate
+) -> Student:
     result = await db.execute(select(Student).where(Student.id == student_id))
     student = result.scalar_one_or_none()
     if not student:
-        raise HTTPException(status_code=404, detail=f"Student with id {student_id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"Student with id {student_id} not found"
+        )
 
     update_data = data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
@@ -167,7 +168,9 @@ async def delete_student(db: AsyncSession, student_id: int) -> dict:
     result = await db.execute(select(Student).where(Student.id == student_id))
     student = result.scalar_one_or_none()
     if not student:
-        raise HTTPException(status_code=404, detail=f"Student with id {student_id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"Student with id {student_id} not found"
+        )
 
     await db.delete(student)
     await db.commit()

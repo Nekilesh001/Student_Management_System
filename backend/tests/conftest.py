@@ -10,17 +10,12 @@ from sqlalchemy.pool import NullPool
 from main import app
 from app.database.connection import get_db, Base
 
-
 TEST_DATABASE_URL = (
     "postgresql+asyncpg://postgres:neki132506@localhost:5432/studentdb_test"
 )
 
 # Important: NullPool prevents loop conflicts
-test_engine = create_async_engine(
-    TEST_DATABASE_URL,
-    echo=False,
-    poolclass=NullPool
-)
+test_engine = create_async_engine(TEST_DATABASE_URL, echo=False, poolclass=NullPool)
 
 TestingSessionLocal = async_sessionmaker(
     bind=test_engine,
@@ -57,10 +52,7 @@ async def setup_database():
 async def client():
     transport = ASGITransport(app=app)
 
-    async with AsyncClient(
-        transport=transport,
-        base_url="http://test"
-    ) as ac:
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
 
 
@@ -73,20 +65,14 @@ async def auth_headers(client):
             "username": "admin1",
             "email": "admin1@test.com",
             "password": "test123",
-            "role": "admin"
-        }
+            "role": "admin",
+        },
     )
 
     response = await client.post(
-        "/auth/login",
-        json={
-            "email": "admin1@test.com",
-            "password": "test123"
-        }
+        "/auth/login", json={"email": "admin1@test.com", "password": "test123"}
     )
 
     token = response.json()["access_token"]
 
-    return {
-        "Authorization": f"Bearer {token}"
-    }
+    return {"Authorization": f"Bearer {token}"}

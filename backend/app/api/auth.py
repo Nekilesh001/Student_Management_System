@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import timedelta
@@ -15,6 +15,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+
 @router.post("/register", response_model=UserResponse, status_code=201)
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == user_data.email))
@@ -29,7 +30,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
         username=user_data.username,
         email=user_data.email,
         password_hash=hash_password(user_data.password),
-        role=user_data.role
+        role=user_data.role,
     )
     db.add(new_user)
     await db.commit()
@@ -54,24 +55,19 @@ async def login(user_data: UserLogin, db: AsyncSession = Depends(get_db)):
 
     access_token = create_access_token(
         data={"user_id": user.id, "email": user.email, "role": user.role},
-        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     )
     return Token(access_token=access_token, token_type="bearer")
 
+
 @router.post("/token")
 async def login_for_swagger(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: AsyncSession = Depends(get_db)
+    form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(
-        select(User).where(User.email == form_data.username)
-    )
+    result = await db.execute(select(User).where(User.email == form_data.username))
     user = result.scalar_one_or_none()
 
-    if not user or not verify_password(
-        form_data.password,
-        user.password_hash
-    ):
+    if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password",
@@ -79,20 +75,12 @@ async def login_for_swagger(
         )
 
     access_token = create_access_token(
-        data={
-            "user_id": user.id,
-            "email": user.email,
-            "role": user.role
-        },
-        expires_delta=timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        )
+        data={"user_id": user.id, "email": user.email, "role": user.role},
+        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     )
 
-    return {
-        "access_token": access_token,
-        "token_type": "bearer"
-    }
+    return {"access_token": access_token, "token_type": "bearer"}
+
 
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: User = Depends(get_current_user)):
